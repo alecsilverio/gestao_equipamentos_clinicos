@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            Gestão de Equipamentos Clínicos
+        {% endblock %}
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='img/favicon.png') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+    <a class="pular-conteudo" href="#conteudo">
+        Ir para o conteúdo
+    </a>
+
+    <aside class="lateral">
+        <a class="marca" href="{{ url_for('painel') }}">
+            <img
+                class="marca__logo"
+                src="{{ url_for('static', filename='img/logo.png') }}"
+                alt="Prefeitura de Três Lagoas"
+            >
+
+            <span class="marca__texto">
+                <strong>Equipamentos Clínicos</strong>
+                <small>Secretaria Municipal de Saúde</small>
+            </span>
+        </a>
+
+        <div class="lateral__divisor"></div>
+
+        <p class="menu-titulo">PRINCIPAL</p>
+
+        <nav class="menu" aria-label="Menu principal">
+            <a
+                class="menu__item menu__item--ativo"
+                href="{{ url_for('painel') }}"
+                aria-current="page"
+            >
+                <span class="menu__icone" aria-hidden="true">▦</span>
+                <span>Painel</span>
+            </a>
+
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">▤</span>
+                <span>Unidades</span>
+                <small>Em breve</small>
+            </span>
+
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">◇</span>
+                <span>Equipamentos</span>
+                <small>Em breve</small>
+            </span>
+
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">▧</span>
+                <span>Ordens de serviço</span>
+                <small>Em breve</small>
+            </span>
+
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">▥</span>
+                <span>Relatórios</span>
+                <small>Em breve</small>
+            </span>
+        </nav>
+
+        <p class="menu-titulo menu-titulo--espaco">
+            ADMINISTRAÇÃO
+        </p>
+
+        <nav class="menu" aria-label="Administração">
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">◎</span>
+                <span>Usuários</span>
+                <small>Em breve</small>
+            </span>
+
+            <span class="menu__item menu__item--pendente">
+                <span class="menu__icone" aria-hidden="true">⚙</span>
+                <span>Configurações</span>
+                <small>Em breve</small>
+            </span>
+        </nav>
+
+        <div class="lateral__rodape">
+            <span class="ambiente">EM DESENVOLVIMENTO</span>
+
+            <p>
+                Inventário e histórico de manutenção da rede municipal.
+            </p>
+        </div>
+    </aside>
+
+    <div class="aplicacao">
+        <header class="topo">
+            <div>
+                <p class="topo__contexto">REDE MUNICIPAL DE SAÚDE</p>
+                <span>Três Lagoas / MS</span>
+            </div>
+
+            <div class="topo__identificacao">
+                <span class="etiqueta">Protótipo inicial</span>
+
+                <span class="avatar" aria-hidden="true">
+                    EC
+                </span>
+            </div>
+        </header>
+
+        <main id="conteudo" class="conteudo">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="rodape">
+            <span>Gestão de Equipamentos Clínicos</span>
+            <span>Secretaria Municipal de Saúde · Três Lagoas/MS</span>
+        </footer>
+    </div>
+</body>
+</html>

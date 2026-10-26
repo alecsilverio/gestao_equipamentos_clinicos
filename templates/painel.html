@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Painel | Gestão de Equipamentos Clínicos
+{% endblock %}
+
+{% block content %}
+<section class="cabecalho-pagina">
+    <div>
+        <p class="sobretitulo">VISÃO GERAL</p>
+
+        <h1>Gestão de equipamentos clínicos</h1>
+
+        <p class="descricao">
+            Informações dos equipamentos, localização por unidade
+            e histórico de manutenção em um só lugar.
+        </p>
+    </div>
+
+    <span class="etiqueta etiqueta--branca">
+        Versão 0.1
+    </span>
+</section>
+
+<section class="indicadores" aria-label="Indicadores previstos">
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Unidades</span>
+            <span class="indicador__icone" aria-hidden="true">▤</span>
+        </div>
+
+        <strong>—</strong>
+        <p>Unidades da rede cadastradas</p>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Equipamentos</span>
+            <span class="indicador__icone" aria-hidden="true">◇</span>
+        </div>
+
+        <strong>—</strong>
+        <p>Equipamentos individualizados</p>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Em manutenção</span>
+            <span class="indicador__icone" aria-hidden="true">⚙</span>
+        </div>
+
+        <strong>—</strong>
+        <p>Acompanhamento operacional</p>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>OS concluídas</span>
+            <span class="indicador__icone" aria-hidden="true">✓</span>
+        </div>
+
+        <strong>—</strong>
+        <p>Atendimentos registrados</p>
+    </article>
+</section>
+
+<section class="apresentacao">
+    <div class="apresentacao__conteudo">
+        <p class="sobretitulo sobretitulo--claro">
+            ORGANIZAÇÃO E RASTREABILIDADE
+        </p>
+
+        <h2>Uma ficha completa para cada equipamento.</h2>
+
+        <p>
+            Identifique o aparelho, consulte suas especificações
+            e encontre os documentos dos serviços realizados,
+            sem perder o histórico quando ele mudar de unidade.
+        </p>
+
+        <div class="fluxo" aria-label="Organização das informações">
+            <span>Unidade</span>
+            <span aria-hidden="true">→</span>
+            <span>Equipamento</span>
+            <span aria-hidden="true">→</span>
+            <span>Histórico técnico</span>
+        </div>
+    </div>
+
+    <div class="apresentacao__simbolo" aria-hidden="true">
+        <span>+</span>
+    </div>
+</section>
+
+<section class="secao">
+    <div class="secao__cabecalho">
+        <div>
+            <p class="sobretitulo">MÓDULOS PREVISTOS</p>
+            <h2>Da localização ao histórico de manutenção</h2>
+        </div>
+    </div>
+
+    <div class="grade-modulos">
+        <article class="painel">
+            <span class="numero-modulo">01</span>
+
+            <h3>Unidades e setores</h3>
+
+            <p>
+                Consulte os locais da rede e os equipamentos
+                vinculados a cada unidade.
+            </p>
+
+            <span class="modulo-status">Próxima implementação</span>
+        </article>
+
+        <article class="painel">
+            <span class="numero-modulo">02</span>
+
+            <h3>Ficha do equipamento</h3>
+
+            <p>
+                Patrimônio, marca, modelo, série, especificações,
+                fotos e documentos.
+            </p>
+
+            <span class="modulo-status">Planejado</span>
+        </article>
+
+        <article class="painel">
+            <span class="numero-modulo">03</span>
+
+            <h3>Histórico de OS</h3>
+
+            <p>
+                Registre os atendimentos e consulte as ordens
+                de serviço finalizadas com seus PDFs.
+            </p>
+
+            <span class="modulo-status">Planejado</span>
+        </article>
+    </div>
+</section>
+
+<div class="aviso">
+    <span class="aviso__icone" aria-hidden="true">i</span>
+
+    <p>
+        Esta é a estrutura visual inicial. Os indicadores ainda não
+        estão conectados ao banco de dados e não representam
+        quantidades reais.
+    </p>
+</div>
+{% endblock %}
