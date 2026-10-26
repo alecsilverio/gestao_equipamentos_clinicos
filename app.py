@@ -638,17 +638,53 @@ def logout():
 @app.get("/")
 @login_obrigatorio
 def painel():
-    total_unidades = get_db().execute(
+    db = get_db()
+
+    unidades = db.execute(
         """
-        SELECT COUNT(*)
+        SELECT
+            COUNT(*) AS total,
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN ativo = 1 THEN 1
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS ativas
         FROM unidades
-        WHERE ativo = 1
         """
-    ).fetchone()[0]
+    ).fetchone()
+
+    equipamentos = db.execute(
+        """
+        SELECT
+            COUNT(*) AS total,
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN situacao = 'Em manutenção' THEN 1
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS em_manutencao
+        FROM equipamentos
+        """
+    ).fetchone()
 
     return render_template(
         "painel.html",
-        total_unidades=total_unidades,
+        total_unidades=unidades["total"],
+        unidades_ativas=unidades["ativas"],
+        unidades_inativas=(
+            unidades["total"] - unidades["ativas"]
+        ),
+        total_equipamentos=equipamentos["total"],
+        equipamentos_em_manutencao=(
+            equipamentos["em_manutencao"]
+        ),
     )
 
 

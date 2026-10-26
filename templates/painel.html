@@ -16,8 +16,8 @@
         </h1>
 
         <p class="descricao">
-            Informações dos equipamentos, localização por unidade
-            e histórico de manutenção em um só lugar.
+            Consulte as unidades da rede, acompanhe o inventário
+            e visualize a situação dos equipamentos cadastrados.
         </p>
     </div>
 
@@ -54,11 +54,11 @@
 
 <section
     class="indicadores"
-    aria-label="Indicadores ainda não disponíveis"
+    aria-label="Indicadores de unidades e equipamentos"
 >
     <article class="indicador">
         <div class="indicador__cabecalho">
-            <span>Unidades</span>
+            <span>Unidades ativas</span>
 
             <span
                 class="indicador__icone"
@@ -68,13 +68,21 @@
             </span>
         </div>
 
-        <strong aria-label="Não disponível">
-            —
+        <strong>
+            {{ unidades_ativas }}
         </strong>
 
         <p>
-            Unidades da rede cadastradas
+            {{ total_unidades }} cadastrada(s) no total;
+            {{ unidades_inativas }} inativa(s).
         </p>
+
+        <a href="{{ url_for(
+            'unidades_lista',
+            situacao='1'
+        ) }}">
+            Consultar unidades ativas
+        </a>
     </article>
 
     <article class="indicador">
@@ -89,13 +97,18 @@
             </span>
         </div>
 
-        <strong aria-label="Não disponível">
-            —
+        <strong>
+            {{ total_equipamentos }}
         </strong>
 
         <p>
-            Equipamentos individualizados
+            Total cadastrado, incluindo equipamentos
+            inativos e baixados.
         </p>
+
+        <a href="{{ url_for('equipamentos_lista') }}">
+            Consultar equipamentos
+        </a>
     </article>
 
     <article class="indicador">
@@ -110,13 +123,21 @@
             </span>
         </div>
 
-        <strong aria-label="Não disponível">
-            —
+        <strong>
+            {{ equipamentos_em_manutencao }}
         </strong>
 
         <p>
-            Acompanhamento operacional
+            Equipamentos com a situação
+            “Em manutenção” no cadastro.
         </p>
+
+        <a href="{{ url_for(
+            'equipamentos_lista',
+            situacao='Em manutenção'
+        ) }}">
+            Consultar em manutenção
+        </a>
     </article>
 
     <article class="indicador">
@@ -136,7 +157,8 @@
         </strong>
 
         <p>
-            Atendimentos registrados
+            Disponível após a implementação
+            do módulo de ordens de serviço.
         </p>
     </article>
 </section>
@@ -148,19 +170,19 @@
         </p>
 
         <h2>
-            Uma ficha completa para cada equipamento.
+            Uma ficha para cada equipamento.
         </h2>
 
         <p>
-            A proposta do sistema é reunir a identificação do
-            aparelho, suas especificações e os documentos dos
-            serviços realizados, preservando o histórico quando
-            ele mudar de unidade.
+            Identifique o aparelho pelo patrimônio,
+            consulte marca, modelo e número de série
+            e acompanhe sua unidade de vínculo,
+            seu setor e sua situação cadastral.
         </p>
 
         <div
             class="fluxo"
-            aria-label="Organização prevista das informações"
+            aria-label="Organização das informações"
         >
             <span>Unidade</span>
 
@@ -174,7 +196,7 @@
                 →
             </span>
 
-            <span>Histórico técnico</span>
+            <span>Dados cadastrais</span>
         </div>
     </div>
 
@@ -190,11 +212,11 @@
     <div class="secao__cabecalho">
         <div>
             <p class="sobretitulo">
-                MÓDULOS PREVISTOS
+                MÓDULOS DO SISTEMA
             </p>
 
             <h2 id="titulo-modulos">
-                Da localização ao histórico de manutenção
+                Da localização ao acompanhamento dos equipamentos
             </h2>
         </div>
     </div>
@@ -206,20 +228,26 @@
             </span>
 
             <h3>
-                Unidades e setores
+                Unidades
             </h3>
 
             <p>
-                Cadastro dos locais da rede e consulta dos
-                equipamentos vinculados a cada unidade e setor.
+                Consulte os locais da rede, seus dados
+                de contato e sua situação cadastral.
+            </p>
+
+            <p>
+                {{ total_unidades }} unidade(s) cadastrada(s):
+                {{ unidades_ativas }} ativa(s)
+                e {{ unidades_inativas }} inativa(s).
             </p>
 
             <a
-    class="modulo-status"
-    href="{{ url_for('unidades_lista') }}"
->
-    Acessar unidades
-</a>
+                class="modulo-status"
+                href="{{ url_for('unidades_lista') }}"
+            >
+                Acessar unidades
+            </a>
         </article>
 
         <article class="painel">
@@ -232,14 +260,30 @@
             </h3>
 
             <p>
-                Identificação por patrimônio, marca, modelo e
-                número de série, com especificações, fotos
-                e documentos.
+                Consulte patrimônio, marca, modelo,
+                número de série, unidade, setor,
+                situação e observações.
             </p>
 
-            <span class="modulo-status">
-                Pendente de implementação
-            </span>
+            <p>
+                {{ total_equipamentos }}
+                equipamento(s) cadastrado(s).
+            </p>
+
+            <a
+                class="modulo-status"
+                href="{{ url_for('equipamentos_lista') }}"
+            >
+                Acessar equipamentos
+            </a>
+
+            {% if g.usuario["papel"] == "administrador_principal" %}
+                <p>
+                    <a href="{{ url_for('equipamentos_novo') }}">
+                        Cadastrar equipamento
+                    </a>
+                </p>
+            {% endif %}
         </article>
 
         <article class="painel">
@@ -252,14 +296,27 @@
             </h3>
 
             <p>
-                Registro dos atendimentos, acompanhamento
-                das manutenções e consulta dos documentos
-                de cada serviço.
+                O registro de atendimentos, o histórico
+                de serviços e seus documentos serão
+                disponibilizados em uma próxima etapa.
             </p>
 
             <span class="modulo-status">
                 Pendente de implementação
             </span>
+
+            <p>
+                Enquanto isso, consulte os equipamentos
+                cuja situação cadastral está marcada
+                como “Em manutenção”.
+            </p>
+
+            <a href="{{ url_for(
+                'equipamentos_lista',
+                situacao='Em manutenção'
+            ) }}">
+                Ver equipamentos em manutenção
+            </a>
         </article>
     </div>
 </section>
@@ -273,12 +330,14 @@
     </span>
 
     <p>
-        Este painel apresenta a estrutura visual inicial.
-        Os indicadores ainda não estão conectados ao banco
-        de dados. O símbolo “—” indica informação não
-        disponível, e não uma quantidade igual a zero.
-        Os módulos de unidades, equipamentos e ordens de
-        serviço ainda precisam ser implementados.
+        Os indicadores de unidades e equipamentos são
+        consultados no banco a cada abertura ou atualização
+        desta página. O total de equipamentos inclui todos
+        os registros cadastrados, inclusive inativos e baixados.
+        “Em manutenção” representa a situação informada no
+        cadastro, não a quantidade de ordens de serviço.
+        O símbolo “—” indica que o indicador de OS ainda
+        não está disponível, e não uma quantidade igual a zero.
     </p>
 </div>
 {% endblock %}
