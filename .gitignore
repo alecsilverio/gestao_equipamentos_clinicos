@@ -47,3 +47,28 @@ instance/
 
 # Logs
 *.log
+
+# Ambientes virtuais
+venv/
+.venv/
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.py[cod]
+
+# Banco, backups e chave secreta local
+instance/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

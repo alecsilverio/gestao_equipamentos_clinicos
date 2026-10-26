@@ -651,8 +651,10 @@ def painel():
         total_unidades=total_unidades,
     )
 
-# Registra as rotas e o comando do módulo de unidades.
+
 from unidades import registrar_unidades
+from equipamentos import registrar_equipamentos
+
 
 registrar_unidades(
     app,
@@ -660,10 +662,17 @@ registrar_unidades(
     login_obrigatorio,
 )
 
-# O servidor deve ser iniciado somente depois dos registros.
+registrar_equipamentos(
+    app,
+    get_db,
+    login_obrigatorio,
+)
+
+
 if __name__ == "__main__":
     app.run(
         host="127.0.0.1",
         port=5000,
         debug=False,
     )
+

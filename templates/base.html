@@ -88,18 +88,19 @@
     <span>Unidades</span>
 </a>
 
-            <span class="menu__item menu__item--pendente">
-                <span
-                    class="menu__icone"
-                    aria-hidden="true"
-                >
-                    ◇
-                </span>
+            <a
+    class="menu__item{% if request.endpoint in ['equipamentos_lista', 'equipamentos_novo', 'equipamentos_editar'] %} menu__item--ativo{% endif %}"
+    href="{{ url_for('equipamentos_lista') }}"
+    {% if request.endpoint in ['equipamentos_lista', 'equipamentos_novo', 'equipamentos_editar'] %}
+        aria-current="page"
+    {% endif %}
+>
+    <span class="menu__icone" aria-hidden="true">
+        ◇
+    </span>
 
-                <span>Equipamentos</span>
-
-                <small>Em breve</small>
-            </span>
+    <span>Equipamentos</span>
+</a>
 
             <span class="menu__item menu__item--pendente">
                 <span
