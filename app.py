@@ -534,11 +534,7 @@ def login():
 
             return redirect(url_for("painel"))
 
-    return render_template_string(
-        LOGIN_HTML,
-        titulo="Login",
-        email=email,
-    )
+    return render_template("login.html")
 
 
 @app.route("/trocar-senha", methods=["GET", "POST"])
