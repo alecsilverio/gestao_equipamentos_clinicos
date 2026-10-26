@@ -5,9 +5,30 @@
 {% endblock %}
 
 {% block formulario %}
-<p class="sobretitulo">ACESSO INSTITUCIONAL</p>
+<div
+    class="acesso__identidade"
+    style="text-align: center; margin-bottom: 24px;"
+>
+    <img
+        src="{{ url_for('static', filename='img/logosms.jpg') }}"
+        alt="Secretaria Municipal de Saúde de Três Lagoas"
+        style="
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            margin: 0 auto;
+        "
+    >
+</div>
 
-<h2>Bem-vindo ao sistema</h2>
+<p class="sobretitulo">
+    ACESSO INSTITUCIONAL
+</p>
+
+<h2>
+    Bem-vindo ao sistema
+</h2>
 
 <p class="acesso__descricao">
     Entre com seu e-mail e sua senha.
@@ -26,12 +47,14 @@
 >
     <input
         type="hidden"
-        name="csrf_token"
+        name="_csrf_token"
         value="{{ csrf_token() }}"
     >
 
     <div class="form-acesso__campo">
-        <label for="email">E-mail institucional</label>
+        <label for="email">
+            E-mail institucional
+        </label>
 
         <input
             type="email"
@@ -47,7 +70,9 @@
     </div>
 
     <div class="form-acesso__campo">
-        <label for="senha">Senha</label>
+        <label for="senha">
+            Senha
+        </label>
 
         <input
             type="password"
@@ -60,7 +85,10 @@
 
     <button class="botao-acesso" type="submit">
         Entrar no sistema
-        <span aria-hidden="true">→</span>
+
+        <span aria-hidden="true">
+            →
+        </span>
     </button>
 </form>
 
