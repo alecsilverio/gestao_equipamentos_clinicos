@@ -1,0 +1,89 @@
+{% extends "acesso_base.html" %}
+
+{% block title %}
+    Primeiro acesso | Gestão de Equipamentos Clínicos
+{% endblock %}
+
+{% block formulario %}
+<p class="sobretitulo">SEGURANÇA DA CONTA</p>
+
+<h2>Defina sua senha pessoal</h2>
+
+<p class="acesso__descricao">
+    Olá, {{ g.usuario["nome"] }}.
+    Substitua a senha temporária para continuar.
+</p>
+
+{% if erro %}
+    <div class="acesso__erro" role="alert">
+        {{ erro }}
+    </div>
+{% endif %}
+
+<form
+    method="post"
+    action="{{ url_for('primeiro_acesso') }}"
+    class="form-acesso"
+>
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    <div class="form-acesso__campo">
+        <label for="nova_senha">Nova senha</label>
+
+        <input
+            type="password"
+            id="nova_senha"
+            name="nova_senha"
+            autocomplete="new-password"
+            minlength="15"
+            aria-describedby="orientacao-senha"
+            required
+        >
+
+        <small id="orientacao-senha">
+            Use pelo menos 6 caracteres.
+            Você pode criar uma frase-senha.
+        </small>
+    </div>
+
+    <div class="form-acesso__campo">
+        <label for="confirmar_senha">
+            Confirme a nova senha
+        </label>
+
+        <input
+            type="password"
+            id="confirmar_senha"
+            name="confirmar_senha"
+            autocomplete="new-password"
+            minlength="6"
+            required
+        >
+    </div>
+
+    <button class="botao-acesso" type="submit">
+        Salvar e continuar
+        <span aria-hidden="true">→</span>
+    </button>
+</form>
+
+<form
+    method="post"
+    action="{{ url_for('logout') }}"
+    class="acesso__saida"
+>
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    <button class="botao-texto" type="submit">
+        Sair desta conta
+    </button>
+</form>
+{% endblock %}

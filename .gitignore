@@ -22,3 +22,28 @@ uploads/
 # Sistema operacional
 Thumbs.db
 .DS_Store
+
+# Ambiente virtual
+venv/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Banco, chave secreta e arquivos locais
+instance/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

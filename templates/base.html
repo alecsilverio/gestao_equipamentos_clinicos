@@ -24,6 +24,8 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
+    {% block extra_head %}{% endblock %}
 </head>
 
 <body>
@@ -41,72 +43,133 @@
 
             <span class="marca__texto">
                 <strong>Equipamentos Clínicos</strong>
-                <small>Secretaria Municipal de Saúde</small>
+
+                <small>
+                    Secretaria Municipal de Saúde
+                </small>
             </span>
         </a>
 
         <div class="lateral__divisor"></div>
 
-        <p class="menu-titulo">PRINCIPAL</p>
+        <p class="menu-titulo">
+            PRINCIPAL
+        </p>
 
         <nav class="menu" aria-label="Menu principal">
             <a
-                class="menu__item menu__item--ativo"
+                class="menu__item{% if request.endpoint == 'painel' %} menu__item--ativo{% endif %}"
                 href="{{ url_for('painel') }}"
-                aria-current="page"
+                {% if request.endpoint == 'painel' %}
+                    aria-current="page"
+                {% endif %}
             >
-                <span class="menu__icone" aria-hidden="true">▦</span>
+                <span
+                    class="menu__icone"
+                    aria-hidden="true"
+                >
+                    ▦
+                </span>
+
                 <span>Painel</span>
             </a>
 
             <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">▤</span>
+                <span
+                    class="menu__icone"
+                    aria-hidden="true"
+                >
+                    ▤
+                </span>
+
                 <span>Unidades</span>
+
                 <small>Em breve</small>
             </span>
 
             <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">◇</span>
+                <span
+                    class="menu__icone"
+                    aria-hidden="true"
+                >
+                    ◇
+                </span>
+
                 <span>Equipamentos</span>
+
                 <small>Em breve</small>
             </span>
 
             <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">▧</span>
+                <span
+                    class="menu__icone"
+                    aria-hidden="true"
+                >
+                    ▧
+                </span>
+
                 <span>Ordens de serviço</span>
+
                 <small>Em breve</small>
             </span>
 
             <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">▥</span>
+                <span
+                    class="menu__icone"
+                    aria-hidden="true"
+                >
+                    ▥
+                </span>
+
                 <span>Relatórios</span>
+
                 <small>Em breve</small>
             </span>
         </nav>
 
-        <p class="menu-titulo menu-titulo--espaco">
-            ADMINISTRAÇÃO
-        </p>
+        {% if g.get("usuario")
+              and g.usuario["papel"] == "administrador_principal" %}
+            <p class="menu-titulo menu-titulo--espaco">
+                ADMINISTRAÇÃO
+            </p>
 
-        <nav class="menu" aria-label="Administração">
-            <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">◎</span>
-                <span>Usuários</span>
-                <small>Em breve</small>
-            </span>
+            <nav class="menu" aria-label="Administração">
+                <span class="menu__item menu__item--pendente">
+                    <span
+                        class="menu__icone"
+                        aria-hidden="true"
+                    >
+                        ◎
+                    </span>
 
-            <span class="menu__item menu__item--pendente">
-                <span class="menu__icone" aria-hidden="true">⚙</span>
-                <span>Configurações</span>
-                <small>Em breve</small>
-            </span>
-        </nav>
+                    <span>Usuários</span>
+
+                    <small>Em breve</small>
+                </span>
+
+                <span class="menu__item menu__item--pendente">
+                    <span
+                        class="menu__icone"
+                        aria-hidden="true"
+                    >
+                        ⚙
+                    </span>
+
+                    <span>Configurações</span>
+
+                    <small>Em breve</small>
+                </span>
+            </nav>
+        {% endif %}
 
         <div class="lateral__rodape">
-            <span class="ambiente">EM DESENVOLVIMENTO</span>
+            <span class="ambiente">
+                EM DESENVOLVIMENTO
+            </span>
 
             <p>
-                Inventário e histórico de manutenção da rede municipal.
+                Inventário e histórico de manutenção
+                da rede municipal.
             </p>
         </div>
     </aside>
@@ -114,34 +177,104 @@
     <div class="aplicacao">
         <header class="topo">
             <div>
-                <p class="topo__contexto">REDE MUNICIPAL DE SAÚDE</p>
+                <p class="topo__contexto">
+                    REDE MUNICIPAL DE SAÚDE
+                </p>
+
                 <span>Três Lagoas / MS</span>
             </div>
 
             <div class="topo__identificacao">
-                <span class="etiqueta">Protótipo inicial</span>
+                {% if g.get("usuario") %}
+                    <div class="usuario-topo">
+                        <strong>
+                            {{ g.usuario["nome"] }}
+                        </strong>
 
-                <span class="avatar" aria-hidden="true">
-                    EC
-                </span>
+                        <small>
+                            {% if g.usuario["papel"] == "administrador_principal" %}
+                                Administrador principal
+                            {% else %}
+                                Consulta
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{{ url_for('logout') }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="_csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            class="botao-sair"
+                            type="submit"
+                        >
+                            Sair
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="usuario-topo">
+                        <strong>
+                            Não autenticado
+                        </strong>
+
+                        <a href="{{ url_for('login') }}">
+                            Entrar
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </header>
 
         <main id="conteudo" class="conteudo">
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    <div
+                        class="mensagens"
+                        aria-live="polite"
+                    >
+                        {% for categoria, mensagem in mensagens %}
+                            <div
+                                class="mensagem mensagem--{{ categoria }}"
+                                role="status"
+                            >
+                                {{ mensagem }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
             {% block content %}{% endblock %}
         </main>
 
         <footer class="rodape">
             <div class="rodape__institucional">
-                <span>Gestão de Equipamentos Clínicos</span>
-                <span>Secretaria Municipal de Saúde · Três Lagoas/MS</span>
+                <span>
+                    Gestão de Equipamentos Clínicos
+                </span>
+
+                <span>
+                    Secretaria Municipal de Saúde ·
+                    Três Lagoas/MS
+                </span>
             </div>
 
             <div class="rodape__autoria">
                 <span>Desenvolvido por</span>
-                <strong>Alexandre Silvério Damião dos Santos</strong>
+
+                <strong>
+                    Alexandre Silvério Damião dos Santos
+                </strong>
             </div>
         </footer>
     </div>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

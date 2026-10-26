@@ -619,3 +619,253 @@ h3 {
         text-align: left;
     }
 }
+
+/* =========================================================
+   LOGIN E PRIMEIRO ACESSO
+   ========================================================= */
+
+.pagina-acesso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 20px;
+    background:
+        radial-gradient(
+            circle at top left,
+            #dfe9f5,
+            transparent 55%
+        ),
+        var(--fundo);
+}
+
+.acesso {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 1020px;
+    overflow: hidden;
+    border: 1px solid var(--borda);
+    border-radius: 24px;
+    background: var(--branco);
+    box-shadow: 0 24px 70px rgba(23, 53, 87, 0.12);
+}
+
+.acesso__institucional {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px;
+    border-bottom: 4px solid var(--vermelho);
+    background: linear-gradient(
+        145deg,
+        var(--azul),
+        var(--azul-escuro)
+    );
+    color: var(--branco);
+}
+
+.acesso__logo {
+    width: 86px;
+    height: 86px;
+    margin-bottom: 34px;
+    padding: 8px;
+    border-radius: 18px;
+    background: var(--branco);
+    object-fit: contain;
+}
+
+.acesso__institucional h1 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.acesso__institucional > p:not(.sobretitulo) {
+    color: #d0deee;
+    font-size: 0.94rem;
+}
+
+.acesso__local {
+    margin-top: 30px;
+    color: #bdcfe3;
+    font-size: 0.78rem;
+}
+
+.acesso__formulario {
+    padding: 48px;
+    align-self: center;
+}
+
+.acesso__formulario h2 {
+    font-size: 1.65rem;
+    letter-spacing: -0.03em;
+}
+
+.acesso__descricao {
+    margin: 12px 0 28px;
+    color: var(--texto-secundario);
+    font-size: 0.88rem;
+}
+
+.form-acesso {
+    display: grid;
+    gap: 20px;
+}
+
+.form-acesso__campo {
+    display: grid;
+    gap: 8px;
+}
+
+.form-acesso__campo label {
+    color: var(--texto);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.form-acesso__campo input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #ccd7e3;
+    border-radius: 10px;
+    background: #fbfcfe;
+    color: var(--texto);
+    font: inherit;
+    font-size: 0.88rem;
+}
+
+.form-acesso__campo input:focus {
+    outline: 3px solid rgba(23, 53, 87, 0.13);
+    border-color: var(--azul);
+}
+
+.form-acesso__campo small {
+    color: var(--texto-secundario);
+    font-size: 0.74rem;
+}
+
+.botao-acesso {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 48px;
+    padding: 13px 17px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--azul);
+    color: var(--branco);
+    font: inherit;
+    font-size: 0.87rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botao-acesso:hover {
+    background: var(--azul-escuro);
+}
+
+.botao-acesso:focus-visible,
+.botao-texto:focus-visible,
+.botao-sair:focus-visible {
+    outline: 3px solid #8acbff;
+    outline-offset: 4px;
+}
+
+.acesso__erro {
+    margin-bottom: 20px;
+    padding: 13px 15px;
+    border: 1px solid #efc6c7;
+    border-radius: 10px;
+    background: #fff2f2;
+    color: #9e1519;
+    font-size: 0.83rem;
+}
+
+.acesso__nota {
+    margin: 24px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--borda);
+    color: var(--texto-secundario);
+    font-size: 0.74rem;
+}
+
+.acesso__rodape {
+    margin-top: 22px;
+    color: var(--texto-secundario);
+    font-size: 0.74rem;
+    text-align: center;
+}
+
+.acesso__saida {
+    margin-top: 18px;
+}
+
+.botao-texto {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--azul);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.usuario-topo {
+    display: grid;
+    gap: 3px;
+    text-align: right;
+}
+
+.usuario-topo strong {
+    color: var(--azul);
+    font-size: 0.8rem;
+}
+
+.usuario-topo small {
+    color: var(--texto-secundario);
+    font-size: 0.7rem;
+}
+
+.botao-sair {
+    padding: 8px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    background: var(--branco);
+    color: var(--azul);
+    font: inherit;
+    font-size: 0.76rem;
+    cursor: pointer;
+}
+
+@media (max-width: 800px) {
+    .acesso {
+        grid-template-columns: 1fr;
+        max-width: 540px;
+    }
+
+    .acesso__institucional,
+    .acesso__formulario {
+        padding: 30px;
+    }
+
+    .acesso__logo {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 20px;
+    }
+
+    .acesso__local {
+        margin-top: 12px;
+    }
+
+    .usuario-topo {
+        text-align: left;
+    }
+
+    .topo__identificacao {
+        flex-wrap: wrap;
+    }
+}

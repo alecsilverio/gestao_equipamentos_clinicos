@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}Acesso | Equipamentos Clínicos{% endblock %}
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='img/favicon.png') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body class="pagina-acesso">
+    <main class="acesso">
+        <section class="acesso__institucional">
+            <img
+                class="acesso__logo"
+                src="{{ url_for('static', filename='img/logo.png') }}"
+                alt="Prefeitura de Três Lagoas"
+            >
+
+            <p class="sobretitulo sobretitulo--claro">
+                SECRETARIA MUNICIPAL DE SAÚDE
+            </p>
+
+            <h1>Gestão de equipamentos clínicos</h1>
+
+            <p>
+                Inventário, localização e histórico de manutenção
+                da rede municipal.
+            </p>
+
+            <span class="acesso__local">
+                Três Lagoas / MS
+            </span>
+        </section>
+
+        <section class="acesso__formulario">
+            {% block formulario %}{% endblock %}
+        </section>
+    </main>
+
+    <footer class="acesso__rodape">
+        Desenvolvido por Alexandre Silvério Damião dos Santos
+    </footer>
+</body>
+</html>
