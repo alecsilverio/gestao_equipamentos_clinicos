@@ -638,9 +638,29 @@ def logout():
 @app.get("/")
 @login_obrigatorio
 def painel():
-    return render_template("painel.html")
+    total_unidades = get_db().execute(
+        """
+        SELECT COUNT(*)
+        FROM unidades
+        WHERE ativo = 1
+        """
+    ).fetchone()[0]
 
+    return render_template(
+        "painel.html",
+        total_unidades=total_unidades,
+    )
 
+# Registra as rotas e o comando do módulo de unidades.
+from unidades import registrar_unidades
+
+registrar_unidades(
+    app,
+    get_db,
+    login_obrigatorio,
+)
+
+# O servidor deve ser iniciado somente depois dos registros.
 if __name__ == "__main__":
     app.run(
         host="127.0.0.1",

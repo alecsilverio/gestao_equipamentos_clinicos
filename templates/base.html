@@ -74,18 +74,19 @@
                 <span>Painel</span>
             </a>
 
-            <span class="menu__item menu__item--pendente">
-                <span
-                    class="menu__icone"
-                    aria-hidden="true"
-                >
-                    ▤
-                </span>
+            <a
+    class="menu__item{% if request.endpoint in ['unidades_lista', 'unidades_nova', 'unidades_editar'] %} menu__item--ativo{% endif %}"
+    href="{{ url_for('unidades_lista') }}"
+    {% if request.endpoint in ['unidades_lista', 'unidades_nova', 'unidades_editar'] %}
+        aria-current="page"
+    {% endif %}
+>
+    <span class="menu__icone" aria-hidden="true">
+        ▤
+    </span>
 
-                <span>Unidades</span>
-
-                <small>Em breve</small>
-            </span>
+    <span>Unidades</span>
+</a>
 
             <span class="menu__item menu__item--pendente">
                 <span
@@ -128,7 +129,7 @@
         </nav>
 
         {% if g.get("usuario")
-              and g.usuario["papel"] == "administrador_principal" %}
+            and g.usuario["papel"] == "administrador_principal" %}
             <p class="menu-titulo menu-titulo--espaco">
                 ADMINISTRAÇÃO
             </p>
