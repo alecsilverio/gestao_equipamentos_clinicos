@@ -686,6 +686,7 @@ def painel():
 
 from unidades import registrar_unidades
 from equipamentos import registrar_equipamentos
+from ordens_servico import registrar_ordens_servico
 
 
 registrar_unidades(
@@ -700,6 +701,12 @@ registrar_equipamentos(
     login_obrigatorio,
 )
 
+registrar_ordens_servico(
+    app,
+    get_db,
+    login_obrigatorio,
+)
+
 
 if __name__ == "__main__":
     app.run(
@@ -707,4 +714,3 @@ if __name__ == "__main__":
         port=5000,
         debug=False,
     )
-
