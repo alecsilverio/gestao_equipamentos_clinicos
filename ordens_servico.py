@@ -4,17 +4,20 @@ import click
 
 
 SITUACOES_OS = (
+    "Não informada",
     "Aberta",
     "Em andamento",
     "Concluída",
     "Cancelada",
 )
 
+
 TIPOS_MANUTENCAO = (
     "Não informado",
     "Preventiva",
     "Corretiva",
 )
+
 
 MODALIDADES_OS = (
     "Não informada",
@@ -27,8 +30,7 @@ SQL_ORDENS_SERVICO = """
 CREATE TABLE IF NOT EXISTS ordens_servico (
     id_os INTEGER PRIMARY KEY AUTOINCREMENT,
 
-    numero_os TEXT NOT NULL
-        CHECK (LENGTH(TRIM(numero_os)) > 0),
+    numero_os TEXT NOT NULL DEFAULT '',
 
     id_unidade INTEGER NOT NULL,
 
@@ -60,14 +62,14 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
 
     tecnico_responsavel TEXT NOT NULL DEFAULT '',
 
-    data_abertura TEXT NOT NULL
-        CHECK (LENGTH(TRIM(data_abertura)) > 0),
+    data_abertura TEXT NOT NULL DEFAULT '',
 
     data_conclusao TEXT,
 
-    situacao TEXT NOT NULL DEFAULT 'Aberta'
+    situacao TEXT NOT NULL DEFAULT 'Não informada'
         CHECK (
             situacao IN (
+                'Não informada',
                 'Aberta',
                 'Em andamento',
                 'Concluída',
@@ -89,14 +91,6 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
 
     atualizado_em TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CHECK (
-        situacao <> 'Concluída'
-        OR (
-            data_conclusao IS NOT NULL
-            AND LENGTH(TRIM(data_conclusao)) > 0
-        )
-    ),
-
     FOREIGN KEY (id_unidade)
         REFERENCES unidades(id_unidade)
         ON DELETE RESTRICT,
@@ -114,6 +108,23 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
         ON DELETE RESTRICT
 )
 """
+
+
+SQL_ORDENS_SERVICO_NOVA = SQL_ORDENS_SERVICO.replace(
+    "CREATE TABLE IF NOT EXISTS ordens_servico (",
+    "CREATE TABLE ordens_servico_nova (",
+)
+
+
+COLUNAS_SQL_OS = (
+    "id_os, numero_os, id_unidade, id_equipamento, "
+    "descricao_equipamento, patrimonio_informado, "
+    "tipo_manutencao, modalidade, empresa_responsavel, "
+    "tecnico_responsavel, data_abertura, data_conclusao, "
+    "situacao, problema_relatado, servico_realizado, "
+    "observacoes, criado_por, atualizado_por, "
+    "criado_em, atualizado_em"
+)
 
 
 SQL_ANEXOS_OS = """
@@ -250,6 +261,93 @@ def registrar_ordens_servico(
         click.echo(f"Anexos existentes: {total_anexos}")
         click.echo("Nenhum cadastro existente foi apagado.")
 
+    @app.cli.command("atualizar-os-simplificada")
+    def atualizar_os_simplificada():
+        """Recria a tabela de OS com campos opcionais."""
+
+        db = get_db()
+        db.commit()
+
+        linha = db.execute(
+            """
+            SELECT sql
+            FROM sqlite_master
+            WHERE type = 'table'
+              AND name = 'ordens_servico'
+            """
+        ).fetchone()
+
+        if linha is None:
+            raise click.ClickException(
+                "A tabela ordens_servico não existe. "
+                "Execute primeiro: flask inicializar-os"
+            )
+
+        if "LENGTH(TRIM(numero_os)) > 0" not in linha[0]:
+            click.echo("A tabela já está no formato simplificado.")
+            return
+
+        total_antes = db.execute(
+            "SELECT COUNT(*) FROM ordens_servico"
+        ).fetchone()[0]
+
+        try:
+            db.execute("PRAGMA foreign_keys = OFF")
+            db.execute("BEGIN IMMEDIATE")
+
+            db.execute(
+                "DROP TABLE IF EXISTS ordens_servico_nova"
+            )
+            db.execute(SQL_ORDENS_SERVICO_NOVA)
+
+            db.execute(
+                f"""
+                INSERT INTO ordens_servico_nova ({COLUNAS_SQL_OS})
+                SELECT {COLUNAS_SQL_OS}
+                FROM ordens_servico
+                """
+            )
+
+            db.execute("DROP TABLE ordens_servico")
+            db.execute(
+                "ALTER TABLE ordens_servico_nova "
+                "RENAME TO ordens_servico"
+            )
+
+            for sql in INDICES_OS:
+                db.execute(sql)
+
+            total_depois = db.execute(
+                "SELECT COUNT(*) FROM ordens_servico"
+            ).fetchone()[0]
+
+            erros = db.execute(
+                "PRAGMA foreign_key_check"
+            ).fetchall()
+
+            if total_depois != total_antes or erros:
+                raise click.ClickException(
+                    "A conferência falhou. Nada foi alterado."
+                )
+
+            db.commit()
+
+        except Exception as erro:
+            db.rollback()
+
+            if isinstance(erro, click.ClickException):
+                raise
+
+            raise click.ClickException(
+                f"Não foi possível atualizar as OS: {erro}"
+            ) from erro
+
+        finally:
+            db.execute("PRAGMA foreign_keys = ON")
+
+        click.echo("Tabela de OS atualizada.")
+        click.echo(f"OS preservadas: {total_depois}")
+
     @app.cli.command("verificar-os")
     def verificar_os():
         """Confere as tabelas e seus vínculos."""
@@ -299,8 +397,8 @@ def registrar_ordens_servico(
         click.echo(f"Total de anexos: {total_anexos}")
         click.echo("Verificação concluída: vínculos válidos.")
 
-
     from os_telas import registrar_telas_os
+    from os_anexos import registrar_anexos_os
 
     registrar_telas_os(
         app,
@@ -309,4 +407,10 @@ def registrar_ordens_servico(
         SITUACOES_OS,
         TIPOS_MANUTENCAO,
         MODALIDADES_OS,
+    )
+
+    registrar_anexos_os(
+        app,
+        get_db,
+        login_obrigatorio,
     )

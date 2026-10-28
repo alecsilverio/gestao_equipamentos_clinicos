@@ -20,11 +20,13 @@ CAMPOS_TEXTO_OS = (
     ("tecnico_responsavel", "Técnico / responsável pelo atendimento", 200),
 )
 
+
 CAMPOS_LONGOS_OS = (
     ("problema_relatado", "Problema relatado"),
     ("servico_realizado", "Serviço realizado"),
     ("observacoes", "Observações"),
 )
+
 
 COLUNAS_OS = (
     "numero_os",
@@ -306,12 +308,12 @@ LISTA_OS_HTML = (
             {% for os in ordens %}
                 <tr>
                     <td>
-                        {{ os["numero_os"] }}
+                        {{ os["numero_os"] or "Sem número" }}
 
                         <small>ID: {{ os["id_os"] }}</small>
 
                         <small>
-                            Abertura:
+                            Atendimento:
                             {{ formatar_data(os["data_abertura"]) }}
                         </small>
 
@@ -362,12 +364,21 @@ LISTA_OS_HTML = (
                     <td>{{ os["situacao"] }}</td>
 
                     <td>
-                        <a href="{{ url_for(
-                            'ordens_editar',
-                            id_os=os['id_os']
-                        ) }}">
-                            {{ "Editar / vincular" if administrador else "Visualizar" }}
-                        </a>
+                        <div class="os-acoes">
+                            <a href="{{ url_for(
+                                'ordens_editar',
+                                id_os=os['id_os']
+                            ) }}">
+                                {{ "Editar / vincular" if administrador else "Visualizar" }}
+                            </a>
+
+                            <a href="{{ url_for(
+                                'ordens_anexos',
+                                id_os=os['id_os']
+                            ) }}">
+                                PDFs
+                            </a>
+                        </div>
                     </td>
                 </tr>
             {% else %}
@@ -437,7 +448,9 @@ FORMULARIO_OS_HTML = (
         <p class="sobretitulo">MANUTENÇÃO</p>
         <h1>{{ titulo }}</h1>
         <p class="descricao">
-            Campos com * são obrigatórios.
+            Só a unidade do atendimento (*) é obrigatória.
+            Os detalhes estão no PDF original, que você anexa
+            depois de salvar.
         </p>
     </div>
 </section>
@@ -468,11 +481,16 @@ FORMULARIO_OS_HTML = (
 
         <div class="os-grade">
             <div class="os-campo">
-                <label for="numero_os">Número da OS *</label>
+                <label for="numero_os">Número da OS</label>
 
                 <input id="numero_os" name="numero_os"
                        value="{{ dados['numero_os'] }}"
-                       maxlength="100" required>
+                       maxlength="100">
+
+                <small>
+                    Deixe em branco se não constar no documento.
+                    O sistema mantém um ID interno.
+                </small>
             </div>
 
             <div class="os-campo">
@@ -543,10 +561,9 @@ FORMULARIO_OS_HTML = (
             {% endfor %}
 
             <div class="os-campo">
-                <label for="tipo_manutencao">Tipo de manutenção *</label>
+                <label for="tipo_manutencao">Tipo de manutenção</label>
 
-                <select id="tipo_manutencao"
-                        name="tipo_manutencao" required>
+                <select id="tipo_manutencao" name="tipo_manutencao">
                     {% for item in tipos %}
                         <option value="{{ item }}"
                             {% if dados['tipo_manutencao'] == item %}
@@ -559,9 +576,9 @@ FORMULARIO_OS_HTML = (
             </div>
 
             <div class="os-campo">
-                <label for="modalidade">Modalidade *</label>
+                <label for="modalidade">Modalidade</label>
 
-                <select id="modalidade" name="modalidade" required>
+                <select id="modalidade" name="modalidade">
                     {% for item in modalidades %}
                         <option value="{{ item }}"
                             {% if dados['modalidade'] == item %}
@@ -574,12 +591,13 @@ FORMULARIO_OS_HTML = (
             </div>
 
             <div class="os-campo">
-                <label for="data_abertura">Data de abertura *</label>
+                <label for="data_abertura">Data do atendimento</label>
 
                 <input id="data_abertura" name="data_abertura"
                        type="date"
-                       value="{{ dados['data_abertura'] }}"
-                       required>
+                       value="{{ dados['data_abertura'] }}">
+
+                <small>Deixe em branco se não souber.</small>
             </div>
 
             <div class="os-campo">
@@ -589,15 +607,13 @@ FORMULARIO_OS_HTML = (
                        type="date"
                        value="{{ dados['data_conclusao'] }}">
 
-                <small>
-                    Obrigatória quando a situação for Concluída.
-                </small>
+                <small>Opcional.</small>
             </div>
 
             <div class="os-campo">
-                <label for="situacao">Situação *</label>
+                <label for="situacao">Situação</label>
 
-                <select id="situacao" name="situacao" required>
+                <select id="situacao" name="situacao">
                     {% for item in situacoes %}
                         <option value="{{ item }}"
                             {% if dados['situacao'] == item %}
@@ -623,8 +639,14 @@ FORMULARIO_OS_HTML = (
 
     <div class="os-acoes">
         {% if administrador %}
-            <button class="os-botao" type="submit">
+            <button class="os-botao" type="submit"
+                    name="acao" value="salvar">
                 Salvar ordem de serviço
+            </button>
+
+            <button class="os-botao" type="submit"
+                    name="acao" value="salvar_e_anexar">
+                Salvar e anexar PDF
             </button>
         {% endif %}
 
@@ -636,9 +658,9 @@ FORMULARIO_OS_HTML = (
 </form>
 
 <div class="os-ajuda">
-    O envio de PDFs será acrescentado na próxima etapa.
-    Salvar ou concluir esta OS não altera automaticamente
-    a situação do equipamento.
+    Use "Salvar e anexar PDF" para enviar o documento original
+    logo após salvar. Salvar ou concluir esta OS não altera
+    automaticamente a situação do equipamento.
 </div>
 {% endblock %}
 """
@@ -713,10 +735,7 @@ def registrar_telas_os(
         erros = []
         db = get_db()
 
-        if not dados["numero_os"]:
-            erros.append("Informe o número da OS.")
-
-        elif len(dados["numero_os"]) > 100:
+        if len(dados["numero_os"]) > 100:
             erros.append("O número da OS deve ter até 100 caracteres.")
 
         for campo, rotulo, limite in CAMPOS_TEXTO_OS:
@@ -770,7 +789,10 @@ def registrar_telas_os(
                 dados["id_equipamento"] = str(id_equipamento)
 
             if equipamento is None:
-                erros.append("Selecione um equipamento válido ou deixe sem vínculo.")
+                erros.append(
+                    "Selecione um equipamento válido "
+                    "ou deixe sem vínculo."
+                )
 
         if dados["situacao"] not in situacoes:
             erros.append("Selecione uma situação válida.")
@@ -784,11 +806,12 @@ def registrar_telas_os(
         abertura = None
         conclusao = None
 
-        try:
-            abertura = date.fromisoformat(dados["data_abertura"])
-            dados["data_abertura"] = abertura.isoformat()
-        except ValueError:
-            erros.append("Informe uma data de abertura válida.")
+        if dados["data_abertura"]:
+            try:
+                abertura = date.fromisoformat(dados["data_abertura"])
+                dados["data_abertura"] = abertura.isoformat()
+            except ValueError:
+                erros.append("Informe uma data do atendimento válida.")
 
         if dados["data_conclusao"]:
             try:
@@ -797,17 +820,10 @@ def registrar_telas_os(
             except ValueError:
                 erros.append("Informe uma data de conclusão válida.")
 
-        if (
-            dados["situacao"] == "Concluída"
-            and not dados["data_conclusao"]
-        ):
-            erros.append(
-                "Informe a data de conclusão para concluir a OS."
-            )
-
         if abertura and conclusao and conclusao < abertura:
             erros.append(
-                "A data de conclusão não pode ser anterior à abertura."
+                "A data de conclusão não pode ser anterior "
+                "à data do atendimento."
             )
 
         return dados, erros
@@ -971,10 +987,10 @@ def registrar_telas_os(
         dados = {coluna: "" for coluna in COLUNAS_OS}
 
         dados.update(
-            situacao="Aberta",
+            situacao="Não informada",
             tipo_manutencao="Não informado",
             modalidade="Não informada",
-            data_abertura=date.today().isoformat(),
+            data_abertura="",
         )
 
         erros = []
@@ -986,8 +1002,21 @@ def registrar_telas_os(
                 db = get_db()
                 id_usuario = g.usuario["id_usuario"]
 
-                try:
+                duplicada = bool(dados["numero_os"]) and (
                     db.execute(
+                        """
+                        SELECT 1
+                        FROM ordens_servico
+                        WHERE numero_os = ?
+                        LIMIT 1
+                        """,
+                        (dados["numero_os"],),
+                    ).fetchone()
+                    is not None
+                )
+
+                try:
+                    cursor = db.execute(
                         """
                         INSERT INTO ordens_servico (
                             numero_os,
@@ -1017,6 +1046,8 @@ def registrar_telas_os(
                         + (id_usuario, id_usuario),
                     )
 
+                    id_nova = cursor.lastrowid
+
                     db.commit()
 
                 except sqlite3.Error:
@@ -1029,10 +1060,20 @@ def registrar_telas_os(
                     )
 
                 else:
-                    flash(
-                        "Ordem de serviço cadastrada com sucesso.",
-                        "sucesso",
-                    )
+                    mensagem = "Ordem de serviço cadastrada com sucesso."
+
+                    if duplicada:
+                        mensagem += (
+                            " Atenção: já existe outra OS com "
+                            "este número. Confira se não é duplicidade."
+                        )
+
+                    flash(mensagem, "sucesso")
+
+                    if request.form.get("acao") == "salvar_e_anexar":
+                        return redirect(
+                            url_for("ordens_anexos", id_os=id_nova)
+                        )
 
                     return redirect(url_for("ordens_lista"))
 
@@ -1119,6 +1160,11 @@ def registrar_telas_os(
                         "Ordem de serviço atualizada com sucesso.",
                         "sucesso",
                     )
+
+                    if request.form.get("acao") == "salvar_e_anexar":
+                        return redirect(
+                            url_for("ordens_anexos", id_os=id_os)
+                        )
 
                     return redirect(url_for("ordens_lista"))
 
