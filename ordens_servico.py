@@ -298,3 +298,15 @@ def registrar_ordens_servico(
         )
         click.echo(f"Total de anexos: {total_anexos}")
         click.echo("Verificação concluída: vínculos válidos.")
+
+
+    from os_telas import registrar_telas_os
+
+    registrar_telas_os(
+        app,
+        get_db,
+        login_obrigatorio,
+        SITUACOES_OS,
+        TIPOS_MANUTENCAO,
+        MODALIDADES_OS,
+    )

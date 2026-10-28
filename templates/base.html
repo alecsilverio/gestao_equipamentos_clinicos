@@ -115,13 +115,19 @@
                 <small>Em breve</small>
             </span>
 
-            <span class="menu__item menu__item--pendente">
-                <span
-                    class="menu__icone"
-                    aria-hidden="true"
-                >
-                    ▥
-                </span>
+            <a
+    class="menu__item{% if request.endpoint in ['ordens_lista', 'ordens_nova', 'ordens_editar'] %} menu__item--ativo{% endif %}"
+    href="{{ url_for('ordens_lista') }}"
+    {% if request.endpoint in ['ordens_lista', 'ordens_nova', 'ordens_editar'] %}
+        aria-current="page"
+    {% endif %}
+>
+    <span class="menu__icone" aria-hidden="true">
+        ▧
+    </span>
+
+    <span>Ordens de serviço</span>
+</a>
 
                 <span>Relatórios</span>
 
