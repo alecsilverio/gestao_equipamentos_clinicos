@@ -671,6 +671,19 @@ def painel():
         """
     ).fetchone()
 
+    return render_template(
+        "painel.html",
+        total_unidades=unidades["total"],
+        unidades_ativas=unidades["ativas"],
+        unidades_inativas=(
+            unidades["total"] - unidades["ativas"]
+        ),
+        total_equipamentos=equipamentos["total"],
+        equipamentos_em_manutencao=(
+            equipamentos["em_manutencao"]
+        ),
+    )
+
 
 from unidades import registrar_unidades
 from equipamentos import registrar_equipamentos
@@ -700,5 +713,5 @@ if __name__ == "__main__":
     app.run(
         host="127.0.0.1",
         port=5000,
-        debug=False,
+        debug=True,
     )
