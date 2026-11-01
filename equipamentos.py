@@ -215,23 +215,51 @@ LISTA_HTML = (
 
     {% if administrador %}
         <a class="equip-botao"
-           href="{{ url_for('equipamentos_novo') }}">
+            href="{{ url_for('equipamentos_novo') }}">
             Cadastrar equipamento
         </a>
     {% endif %}
 </div>
 
+{% if filtro_manutencao %}
+    <div class="equip-ajuda">
+        Exibindo equipamentos em manutenção: com essa situação
+        no cadastro ou com OS em andamento.
+        <a href="{{ url_for('equipamentos_lista') }}">Ver todos</a>
+    </div>
+{% endif %}
+
+{% if filtro_manutencao %}
+    <div class="equip-ajuda">
+        Exibindo equipamentos em manutenção: com essa situação
+        no cadastro ou com OS em andamento.
+        <a href="{{ url_for('equipamentos_lista') }}">Ver todos</a>
+    </div>
+{% endif %}
+
 <form method="get"
-      action="{{ url_for('equipamentos_lista') }}"
-      class="painel">
+    action="{{ url_for('equipamentos_lista') }}"
+    class="painel">
+
+    {% if filtro_manutencao %}
+        <input type="hidden"
+        name="em_manutencao"
+        value="{{ filtro_manutencao }}">
+    {% endif %}
+
+    {% if filtro_manutencao %}
+        <input type="hidden"
+                name="em_manutencao"
+                value="{{ filtro_manutencao }}">
+    {% endif %}
 
     <div class="equip-grade">
         <div class="equip-campo">
             <label for="q">Pesquisar</label>
             <input id="q" name="q"
-                   value="{{ busca }}"
-                   maxlength="200"
-                   placeholder="Descrição, patrimônio, marca, modelo ou série">
+                    value="{{ busca }}"
+                    maxlength="200"
+                    placeholder="Descrição, patrimônio, marca, modelo ou série">
         </div>
 
         <div class="equip-campo">
@@ -320,7 +348,14 @@ LISTA_HTML = (
                         </small>
                     </td>
 
-                    <td>{{ item["situacao"] }}</td>
+                    <td>
+                        {{ item["situacao"] }}
+
+                        {% if item["os_em_andamento"]
+                                and item["situacao"] != "Em manutenção" %}
+                            <small>Em manutenção: há OS em andamento</small>
+                        {% endif %}
+                    </td>
 
                     <td>
                         <div class="equip-acoes">
@@ -331,12 +366,19 @@ LISTA_HTML = (
                                 {{ "Editar" if administrador else "Visualizar" }}
                             </a>
 
+                            <a href="{{ url_for(
+                                'ordens_lista',
+                                id_equipamento=item['id_equipamento']
+                            ) }}">
+                                OS ({{ item["total_os"] }})
+                            </a>
+
                             {% if administrador %}
                                 <a class="equip-link-perigo"
-                                   href="{{ url_for(
-                                       'equipamentos_excluir',
-                                       id_equipamento=item['id_equipamento']
-                                   ) }}">
+                                    href="{{ url_for(
+                                        'equipamentos_excluir',
+                                        id_equipamento=item['id_equipamento']
+                                    ) }}">
                                     Excluir
                                 </a>
                             {% endif %}
@@ -466,10 +508,10 @@ FORMULARIO_HTML = (
                     </label>
 
                     <input id="{{ campo }}"
-                           name="{{ campo }}"
-                           value="{{ dados[campo] }}"
-                           maxlength="{{ limite }}"
-                           {% if campo == "descricao" %}required{% endif %}>
+                            name="{{ campo }}"
+                            value="{{ dados[campo] }}"
+                            maxlength="{{ limite }}"
+                            {% if campo == "descricao" %}required{% endif %}>
 
                     {% if campo == "patrimonio" %}
                         <small>
@@ -505,9 +547,9 @@ FORMULARIO_HTML = (
                 <label for="observacoes">Observações</label>
 
                 <textarea id="observacoes"
-                          name="observacoes"
-                          rows="5"
-                          maxlength="5000"
+                            name="observacoes"
+                            rows="5"
+                            maxlength="5000"
                 >{{ dados["observacoes"] }}</textarea>
             </div>
         </div>
@@ -521,7 +563,7 @@ FORMULARIO_HTML = (
         {% endif %}
 
         <a class="equip-botao equip-botao--secundario"
-           href="{{ url_for('equipamentos_lista') }}">
+            href="{{ url_for('equipamentos_lista') }}">
             Voltar à lista
         </a>
     </div>
@@ -530,10 +572,10 @@ FORMULARIO_HTML = (
 {% if administrador and id_equipamento %}
     <div class="equip-acoes">
         <a class="equip-botao equip-botao--perigo"
-           href="{{ url_for(
-               'equipamentos_excluir',
-               id_equipamento=id_equipamento
-           ) }}">
+            href="{{ url_for(
+                'equipamentos_excluir',
+                id_equipamento=id_equipamento
+            ) }}">
             Excluir este cadastro
         </a>
     </div>
@@ -610,20 +652,20 @@ EXCLUIR_HTML = (
 
     {% if not bloqueado %}
         <form method="post"
-              action="{{ url_for(
-                  'equipamentos_excluir',
-                  id_equipamento=equipamento['id_equipamento']
-              ) }}">
+                action="{{ url_for(
+                    'equipamentos_excluir',
+                    id_equipamento=equipamento['id_equipamento']
+                ) }}">
 
             <input type="hidden"
-                   name="_csrf_token"
-                   value="{{ csrf_token() }}">
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}">
 
             <label class="equip-confirmacao">
                 <input type="checkbox"
-                       name="confirmar"
-                       value="sim"
-                       required>
+                        name="confirmar"
+                        value="sim"
+                        required>
                 <span>
                     Conferi os dados e confirmo a exclusão
                     definitiva deste cadastro.
@@ -637,7 +679,7 @@ EXCLUIR_HTML = (
                 </button>
 
                 <a class="equip-botao equip-botao--secundario"
-                   href="{{ url_for('equipamentos_lista') }}">
+                    href="{{ url_for('equipamentos_lista') }}">
                     Cancelar
                 </a>
             </div>
@@ -645,7 +687,7 @@ EXCLUIR_HTML = (
     {% else %}
         <div class="equip-acoes">
             <a class="equip-botao equip-botao--secundario"
-               href="{{ url_for('equipamentos_lista') }}">
+                href="{{ url_for('equipamentos_lista') }}">
                 Voltar à lista
             </a>
         </div>
@@ -902,10 +944,10 @@ def registrar_equipamentos(app, get_db, login_obrigatorio):
                 SELECT id_equipamento, descricao
                 FROM equipamentos
                 WHERE UPPER(TRIM(patrimonio)) = UPPER(TRIM(?))
-                  AND (
-                      ? IS NULL
-                      OR id_equipamento <> ?
-                  )
+                    AND (
+                        ? IS NULL
+                        OR id_equipamento <> ?
+                    )
                 LIMIT 1
                 """,
                 (
@@ -989,7 +1031,7 @@ def registrar_equipamentos(app, get_db, login_obrigatorio):
             SELECT name
             FROM sqlite_master
             WHERE type = 'table'
-              AND name NOT LIKE 'sqlite_%'
+                AND name NOT LIKE 'sqlite_%'
             """
         ).fetchall()
 
@@ -1036,9 +1078,28 @@ def registrar_equipamentos(app, get_db, login_obrigatorio):
         busca = request.args.get("q", "").strip()[:200]
         filtro_unidade = request.args.get("id_unidade", type=int)
         filtro_situacao = request.args.get("situacao", "")
+        filtro_manutencao = request.args.get("em_manutencao", "")
+
+        if filtro_manutencao != "1":
+            filtro_manutencao = ""
 
         if filtro_situacao not in SITUACOES:
             filtro_situacao = ""
+        
+        if filtro_manutencao == "1":
+            condicoes.append(
+                """
+                (
+                    e.situacao = 'Em manutenção'
+                    OR EXISTS (
+                        SELECT 1
+                        FROM ordens_servico x
+                        WHERE x.id_equipamento = e.id_equipamento
+                            x.situacao = 'Em andamento'
+                    )
+                )
+                """
+            )
 
         condicoes = []
         parametros = []
@@ -1089,7 +1150,7 @@ def registrar_equipamentos(app, get_db, login_obrigatorio):
             + where
             + """
             ORDER BY e.descricao COLLATE NOCASE,
-                     e.id_equipamento
+                        e.id_equipamento
             LIMIT ? OFFSET ?
             """,
             parametros + [

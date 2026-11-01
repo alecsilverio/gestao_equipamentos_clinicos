@@ -656,32 +656,20 @@ def painel():
     equipamentos = db.execute(
         """
         SELECT
-            COUNT(*) AS total,
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN situacao = 'Em manutenção' THEN 1
-                        ELSE 0
-                    END
-                ),
-                0
+            (SELECT COUNT(*) FROM equipamentos) AS total,
+            (
+                SELECT COUNT(*)
+                FROM equipamentos e
+                WHERE e.situacao = 'Em manutenção'
+                    OR EXISTS (
+                        SELECT 1
+                        FROM ordens_servico o
+                        WHERE o.id_equipamento = e.id_equipamento
+                            AND o.situacao = 'Em andamento'
+                    )
             ) AS em_manutencao
-        FROM equipamentos
         """
     ).fetchone()
-
-    return render_template(
-        "painel.html",
-        total_unidades=unidades["total"],
-        unidades_ativas=unidades["ativas"],
-        unidades_inativas=(
-            unidades["total"] - unidades["ativas"]
-        ),
-        total_equipamentos=equipamentos["total"],
-        equipamentos_em_manutencao=(
-            equipamentos["em_manutencao"]
-        ),
-    )
 
 
 from unidades import registrar_unidades

@@ -4,7 +4,34 @@
     Painel | Gestão de Equipamentos Clínicos
 {% endblock %}
 
+{% block extra_head %}
+<style>
+    .painel-tabela-container {
+        overflow-x: auto;
+    }
+
+    .painel-tabela {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .painel-tabela th,
+    .painel-tabela td {
+        padding: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .painel-tabela th {
+        background: #f1f5f9;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+{% set ind = indicadores_os() %}
+
 <section class="cabecalho-pagina">
     <div>
         <p class="sobretitulo">
@@ -60,10 +87,7 @@
         <div class="indicador__cabecalho">
             <span>Unidades ativas</span>
 
-            <span
-                class="indicador__icone"
-                aria-hidden="true"
-            >
+            <span class="indicador__icone" aria-hidden="true">
                 ▤
             </span>
         </div>
@@ -77,10 +101,7 @@
             {{ unidades_inativas }} inativa(s).
         </p>
 
-        <a href="{{ url_for(
-            'unidades_lista',
-            situacao='1'
-        ) }}">
+        <a href="{{ url_for('unidades_lista', situacao='1') }}">
             Consultar unidades ativas
         </a>
     </article>
@@ -89,10 +110,7 @@
         <div class="indicador__cabecalho">
             <span>Equipamentos</span>
 
-            <span
-                class="indicador__icone"
-                aria-hidden="true"
-            >
+            <span class="indicador__icone" aria-hidden="true">
                 ◇
             </span>
         </div>
@@ -115,10 +133,7 @@
         <div class="indicador__cabecalho">
             <span>Em manutenção</span>
 
-            <span
-                class="indicador__icone"
-                aria-hidden="true"
-            >
+            <span class="indicador__icone" aria-hidden="true">
                 ⚙
             </span>
         </div>
@@ -128,13 +143,13 @@
         </strong>
 
         <p>
-            Equipamentos com a situação
-            “Em manutenção” no cadastro.
+            Equipamentos marcados como “Em manutenção”
+            no cadastro ou com OS em andamento.
         </p>
 
         <a href="{{ url_for(
             'equipamentos_lista',
-            situacao='Em manutenção'
+            em_manutencao='1'
         ) }}">
             Consultar em manutenção
         </a>
@@ -144,23 +159,187 @@
         <div class="indicador__cabecalho">
             <span>OS concluídas</span>
 
-            <span
-                class="indicador__icone"
-                aria-hidden="true"
-            >
+            <span class="indicador__icone" aria-hidden="true">
                 ✓
             </span>
         </div>
 
-        <strong aria-label="Não disponível">
-            —
+        <strong>
+            {{ ind["concluidas"] }}
         </strong>
 
         <p>
-            Disponível após a implementação
-            do módulo de ordens de serviço.
+            Ordens de serviço com a situação
+            “Concluída” no cadastro.
         </p>
+
+        <a href="{{ url_for('ordens_lista', situacao='Concluída') }}">
+            Consultar OS concluídas
+        </a>
     </article>
+</section>
+
+<section
+    class="indicadores"
+    aria-label="Indicadores de ordens de serviço"
+>
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Ordens de serviço</span>
+
+            <span class="indicador__icone" aria-hidden="true">
+                ▣
+            </span>
+        </div>
+
+        <strong>
+            {{ ind["total"] }}
+        </strong>
+
+        <p>
+            Total cadastrado;
+            {{ ind["em_aberto"] }} aberta(s) ou em andamento.
+        </p>
+
+        <a href="{{ url_for('ordens_lista') }}">
+            Consultar ordens de serviço
+        </a>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Sem equipamento vinculado</span>
+
+            <span class="indicador__icone" aria-hidden="true">
+                ⛓
+            </span>
+        </div>
+
+        <strong>
+            {{ ind["sem_equipamento"] }}
+        </strong>
+
+        <p>
+            OS que ainda não foram associadas
+            a um equipamento cadastrado.
+        </p>
+
+        <a href="{{ url_for('ordens_lista', vinculo='sem') }}">
+            Consultar pendências de vínculo
+        </a>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Sem PDF anexado</span>
+
+            <span class="indicador__icone" aria-hidden="true">
+                ▯
+            </span>
+        </div>
+
+        <strong>
+            {{ ind["sem_pdf"] }}
+        </strong>
+
+        <p>
+            OS cadastradas sem nenhum documento
+            em PDF anexado.
+        </p>
+
+        <a href="{{ url_for('ordens_lista', pdf='sem') }}">
+            Consultar OS sem PDF
+        </a>
+    </article>
+
+    <article class="indicador">
+        <div class="indicador__cabecalho">
+            <span>Situação não informada</span>
+
+            <span class="indicador__icone" aria-hidden="true">
+                ?
+            </span>
+        </div>
+
+        <strong>
+            {{ ind["nao_informada"] }}
+        </strong>
+
+        <p>
+            Cadastros que ainda precisam
+            de revisão da situação.
+        </p>
+
+        <a href="{{ url_for(
+            'ordens_lista',
+            situacao='Não informada'
+        ) }}">
+            Consultar para revisar
+        </a>
+    </article>
+</section>
+
+<section class="secao" aria-labelledby="titulo-recentes">
+    <div class="secao__cabecalho">
+        <div>
+            <p class="sobretitulo">
+                ORDENS DE SERVIÇO
+            </p>
+
+            <h2 id="titulo-recentes">
+                Últimas OS cadastradas
+            </h2>
+        </div>
+    </div>
+
+    <div class="painel painel-tabela-container">
+        <table class="painel-tabela">
+            <thead>
+                <tr>
+                    <th scope="col">OS</th>
+                    <th scope="col">Atendimento</th>
+                    <th scope="col">Unidade</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Ação</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in ind["recentes"] %}
+                    {% set d = item["data_abertura"] %}
+                    <tr>
+                        <td>
+                            {{ item["numero_os"] or "Sem número" }}
+                        </td>
+
+                        <td>
+                            {{ (d[8:10] ~ "/" ~ d[5:7] ~ "/" ~ d[0:4])
+                               if d else "Não informada" }}
+                        </td>
+
+                        <td>{{ item["unidade_nome"] }}</td>
+
+                        <td>{{ item["situacao"] }}</td>
+
+                        <td>
+                            <a href="{{ url_for(
+                                'ordens_anexos',
+                                id_os=item['id_os']
+                            ) }}">
+                                PDFs ({{ item["total_anexos"] }})
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            Nenhuma ordem de serviço cadastrada.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </section>
 
 <section class="apresentacao">
@@ -177,7 +356,8 @@
             Identifique o aparelho pelo patrimônio,
             consulte marca, modelo e número de série
             e acompanhe sua unidade de vínculo,
-            seu setor e sua situação cadastral.
+            seu setor, sua situação cadastral
+            e as ordens de serviço associadas.
         </p>
 
         <div
@@ -186,24 +366,17 @@
         >
             <span>Unidade</span>
 
-            <span aria-hidden="true">
-                →
-            </span>
+            <span aria-hidden="true">→</span>
 
             <span>Equipamento</span>
 
-            <span aria-hidden="true">
-                →
-            </span>
+            <span aria-hidden="true">→</span>
 
-            <span>Dados cadastrais</span>
+            <span>Ordens de serviço</span>
         </div>
     </div>
 
-    <div
-        class="apresentacao__simbolo"
-        aria-hidden="true"
-    >
+    <div class="apresentacao__simbolo" aria-hidden="true">
         <span>+</span>
     </div>
 </section>
@@ -223,13 +396,9 @@
 
     <div class="grade-modulos">
         <article class="painel">
-            <span class="numero-modulo">
-                01
-            </span>
+            <span class="numero-modulo">01</span>
 
-            <h3>
-                Unidades
-            </h3>
+            <h3>Unidades</h3>
 
             <p>
                 Consulte os locais da rede, seus dados
@@ -251,13 +420,9 @@
         </article>
 
         <article class="painel">
-            <span class="numero-modulo">
-                02
-            </span>
+            <span class="numero-modulo">02</span>
 
-            <h3>
-                Ficha do equipamento
-            </h3>
+            <h3>Ficha do equipamento</h3>
 
             <p>
                 Consulte patrimônio, marca, modelo,
@@ -287,57 +452,56 @@
         </article>
 
         <article class="painel">
-            <span class="numero-modulo">
-                03
-            </span>
+            <span class="numero-modulo">03</span>
 
-            <h3>
-                Histórico de ordens de serviço
-            </h3>
+            <h3>Ordens de serviço</h3>
 
             <p>
-                O registro de atendimentos, o histórico
-                de serviços e seus documentos serão
-                disponibilizados em uma próxima etapa.
+                Registre os atendimentos por unidade, vincule
+                o equipamento quando disponível e guarde os
+                documentos originais em PDF.
             </p>
-
-            <span class="modulo-status">
-                Pendente de implementação
-            </span>
 
             <p>
-                Enquanto isso, consulte os equipamentos
-                cuja situação cadastral está marcada
-                como “Em manutenção”.
+                {{ ind["total"] }} OS cadastrada(s);
+                {{ ind["sem_equipamento"] }} sem equipamento
+                vinculado.
             </p>
 
-            <a href="{{ url_for(
-                'equipamentos_lista',
-                situacao='Em manutenção'
-            ) }}">
-                Ver equipamentos em manutenção
+            <a
+                class="modulo-status"
+                href="{{ url_for('ordens_lista') }}"
+            >
+                Acessar ordens de serviço
             </a>
+
+            {% if g.usuario["papel"] == "administrador_principal" %}
+                <p>
+                    <a href="{{ url_for('ordens_nova') }}">
+                        Cadastrar OS
+                    </a>
+                </p>
+            {% endif %}
         </article>
     </div>
 </section>
 
 <div class="aviso" role="note">
-    <span
-        class="aviso__icone"
-        aria-hidden="true"
-    >
+    <span class="aviso__icone" aria-hidden="true">
         i
     </span>
 
     <p>
-        Os indicadores de unidades e equipamentos são
-        consultados no banco a cada abertura ou atualização
-        desta página. O total de equipamentos inclui todos
-        os registros cadastrados, inclusive inativos e baixados.
-        “Em manutenção” representa a situação informada no
-        cadastro, não a quantidade de ordens de serviço.
-        O símbolo “—” indica que o indicador de OS ainda
-        não está disponível, e não uma quantidade igual a zero.
+        Os indicadores são consultados no banco a cada abertura
+        ou atualização desta página. O total de equipamentos
+        inclui todos os registros cadastrados, inclusive inativos
+        e baixados. “Em manutenção” representa a situação
+        informada no cadastro do equipamento, não a quantidade
+        de ordens de serviço. Os indicadores de OS refletem o
+        que foi cadastrado: uma OS com situação “Não informada”
+        não entra nas contagens de concluídas ou em andamento,
+        e “sem PDF” considera apenas os documentos anexados
+        no sistema.
     </p>
 </div>
 {% endblock %}

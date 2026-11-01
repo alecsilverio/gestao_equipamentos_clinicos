@@ -183,24 +183,45 @@ LISTA_OS_HTML = (
 
     {% if administrador %}
         <a class="os-botao"
-           href="{{ url_for('ordens_nova') }}">
+            href="{{ url_for('ordens_nova') }}">
             Cadastrar OS
         </a>
     {% endif %}
 </div>
 
+{% if filtro_equipamento %}
+    <div class="os-ajuda">
+        Exibindo somente as OS vinculadas ao equipamento
+        ID {{ filtro_equipamento }}.
+        <a href="{{ url_for('ordens_lista') }}">Ver todas</a>
+    </div>
+{% endif %}
+
+{% if filtro_pdf %}
+    <div class="os-ajuda">
+        Exibindo somente as OS sem PDF anexado.
+        <a href="{{ url_for('ordens_lista') }}">Ver todas</a>
+    </div>
+{% endif %}
+
 <form method="get"
-      action="{{ url_for('ordens_lista') }}"
-      class="painel">
+        action="{{ url_for('ordens_lista') }}"
+        class="painel">
+
+    {% if filtro_equipamento %}
+        <input type="hidden"
+                name="id_equipamento"
+                value="{{ filtro_equipamento }}">
+    {% endif %}
 
     <div class="os-grade">
         <div class="os-campo">
             <label for="q">Pesquisar</label>
 
             <input id="q" name="q"
-                   value="{{ busca }}"
-                   maxlength="200"
-                   placeholder="Número, equipamento, patrimônio ou empresa">
+                    value="{{ busca }}"
+                    maxlength="200"
+                    placeholder="Número, equipamento, patrimônio ou empresa">
         </div>
 
         <div class="os-campo">
@@ -376,7 +397,7 @@ LISTA_OS_HTML = (
                                 'ordens_anexos',
                                 id_os=os['id_os']
                             ) }}">
-                                PDFs
+                                PDFs ({{ os["total_anexos"] }})
                             </a>
                         </div>
                     </td>
@@ -401,6 +422,8 @@ LISTA_OS_HTML = (
             situacao=filtro_situacao,
             tipo_manutencao=filtro_tipo,
             vinculo=filtro_vinculo,
+            id_equipamento=filtro_equipamento or '',
+            pdf=filtro_pdf,
             pagina=pagina-1
         ) }}">
             Anterior
@@ -417,6 +440,8 @@ LISTA_OS_HTML = (
             situacao=filtro_situacao,
             tipo_manutencao=filtro_tipo,
             vinculo=filtro_vinculo,
+            id_equipamento=filtro_equipamento or '',
+            pdf=filtro_pdf,         
             pagina=pagina+1
         ) }}">
             Próxima
@@ -473,19 +498,19 @@ FORMULARIO_OS_HTML = (
 
 <form method="post" class="painel">
     <input type="hidden"
-           name="_csrf_token"
-           value="{{ csrf_token() }}">
+            name="_csrf_token"
+            value="{{ csrf_token() }}">
 
     <fieldset {% if not administrador %}disabled{% endif %}
-              style="border:0; padding:0; min-width:0;">
+                style="border:0; padding:0; min-width:0;">
 
         <div class="os-grade">
             <div class="os-campo">
                 <label for="numero_os">Número da OS</label>
 
                 <input id="numero_os" name="numero_os"
-                       value="{{ dados['numero_os'] }}"
-                       maxlength="100">
+                        value="{{ dados['numero_os'] }}"
+                        maxlength="100">
 
                 <small>
                     Deixe em branco se não constar no documento.
@@ -630,7 +655,7 @@ FORMULARIO_OS_HTML = (
                     <label for="{{ campo }}">{{ rotulo }}</label>
 
                     <textarea id="{{ campo }}" name="{{ campo }}"
-                              rows="4" maxlength="10000"
+                                rows="4" maxlength="10000"
                     >{{ dados[campo] }}</textarea>
                 </div>
             {% endfor %}
@@ -651,7 +676,7 @@ FORMULARIO_OS_HTML = (
         {% endif %}
 
         <a class="os-botao os-botao--secundario"
-           href="{{ url_for('ordens_lista') }}">
+            href="{{ url_for('ordens_lista') }}">
             Voltar à lista
         </a>
     </div>
@@ -722,7 +747,7 @@ def registrar_telas_os(
             FROM equipamentos e
             JOIN unidades u ON u.id_unidade = e.id_unidade
             ORDER BY e.descricao COLLATE NOCASE,
-                     e.id_equipamento
+                    e.id_equipamento
             """
         ).fetchall()
 
@@ -860,6 +885,72 @@ def registrar_telas_os(
             modalidades=modalidades,
             administrador=eh_administrador(),
         )
+    @app.context_processor
+    def fornecer_indicadores_os():
+        def indicadores_os():
+            db = get_db()
+
+            resumo = dict(
+                db.execute(
+                    """
+                    SELECT
+                        COUNT(*) AS total,
+                        COALESCE(SUM(
+                            CASE WHEN situacao = 'Concluída'
+                                 THEN 1 ELSE 0 END
+                        ), 0) AS concluidas,
+                        COALESCE(SUM(
+                            CASE WHEN situacao IN ('Aberta', 'Em andamento')
+                                 THEN 1 ELSE 0 END
+                        ), 0) AS em_aberto,
+                        COALESCE(SUM(
+                            CASE WHEN situacao = 'Não informada'
+                                 THEN 1 ELSE 0 END
+                        ), 0) AS nao_informada,
+                        COALESCE(SUM(
+                            CASE WHEN id_equipamento IS NULL
+                                 THEN 1 ELSE 0 END
+                        ), 0) AS sem_equipamento
+                    FROM ordens_servico
+                    """
+                ).fetchone()
+            )
+
+            resumo["sem_pdf"] = db.execute(
+                """
+                SELECT COUNT(*)
+                FROM ordens_servico o
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM anexos_os a
+                    WHERE a.id_os = o.id_os
+                )
+                """
+            ).fetchone()[0]
+
+            resumo["recentes"] = db.execute(
+                """
+                SELECT
+                    o.id_os,
+                    o.numero_os,
+                    o.data_abertura,
+                    o.situacao,
+                    u.nome AS unidade_nome,
+                    (
+                        SELECT COUNT(*)
+                        FROM anexos_os a
+                        WHERE a.id_os = o.id_os
+                    ) AS total_anexos
+                FROM ordens_servico o
+                JOIN unidades u ON u.id_unidade = o.id_unidade
+                ORDER BY o.criado_em DESC, o.id_os DESC
+                LIMIT 5
+                """
+            ).fetchall()
+
+            return resumo
+
+        return {"indicadores_os": indicadores_os}
 
     @app.get("/ordens-servico")
     @login_obrigatorio
@@ -871,7 +962,12 @@ def registrar_telas_os(
         filtro_situacao = request.args.get("situacao", "")
         filtro_tipo = request.args.get("tipo_manutencao", "")
         filtro_vinculo = request.args.get("vinculo", "")
+        filtro_equipamento = request.args.get("id_equipamento", type=int)
+        filtro_pdf = request.args.get("pdf", "")
 
+        if filtro_pdf != "sem":
+            filtro_pdf = ""
+        
         if filtro_situacao not in situacoes:
             filtro_situacao = ""
 
@@ -902,6 +998,21 @@ def registrar_telas_os(
         if filtro_unidade is not None:
             condicoes.append("o.id_unidade = ?")
             parametros.append(filtro_unidade)
+        
+        if filtro_equipamento is not None:
+            condicoes.append("o.id_equipamento = ?")
+            parametros.append(filtro_equipamento)
+        
+        if filtro_pdf == "sem":
+            condicoes.append(
+                """
+                NOT EXISTS (
+                    SELECT 1
+                    FROM anexos_os x
+                    WHERE x.id_os = o.id_os
+                )
+                """
+            )
 
         if filtro_situacao:
             condicoes.append("o.situacao = ?")
@@ -945,7 +1056,12 @@ def registrar_telas_os(
                 o.*,
                 u.nome AS unidade_nome,
                 e.descricao AS equipamento_nome,
-                e.patrimonio AS equipamento_patrimonio
+                e.patrimonio AS equipamento_patrimonio,
+                (
+                    SELECT COUNT(*)
+                    FROM anexos_os a
+                    WHERE a.id_os = o.id_os
+                ) AS total_anexos
             """
             + origem
             + where
@@ -975,6 +1091,8 @@ def registrar_telas_os(
             paginas=paginas,
             administrador=eh_administrador(),
             formatar_data=formatar_data,
+            filtro_equipamento=filtro_equipamento,
+            filtro_pdf=filtro_pdf,
         )
 
     @app.route(
