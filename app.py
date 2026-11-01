@@ -708,6 +708,14 @@ registrar_ordens_servico(
     login_obrigatorio,
 )
 
+from relatorios import registrar_relatorios
+
+registrar_relatorios(
+    app,
+    get_db,
+    login_obrigatorio,
+)
+
 
 if __name__ == "__main__":
     app.run(
